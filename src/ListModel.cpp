@@ -1,5 +1,6 @@
 #include "ListModel.h"
 #include "videomimedata.h"
+#include "youtubeinforeader.h"
 
 #define MAX_ITEMS 10
 static const QString recentKeywordsKey = "recentKeywords";
@@ -11,6 +12,8 @@ ListModel::ListModel(QWidget *parent) : QAbstractListModel(parent) {
     m_activeVideo = 0;
     m_activeRow = -1;
     skip = 1;
+    searchParams = 0;
+    justPastedVideo = false;
 }
 
 ListModel::~ListModel() {
@@ -147,6 +150,10 @@ Video* ListModel::activeVideo() const {
 }
 
 void ListModel::search(SearchParams *searchParams) {
+    if (justPastedVideo) {
+        justPastedVideo = false;
+        return;
+    }
 
     // delete current videos
     while (!videos.isEmpty())
@@ -168,6 +175,47 @@ void ListModel::search(SearchParams *searchParams) {
     searching = true;
     youtubeSearch->search(searchParams, MAX_ITEMS, skip);
     skip += MAX_ITEMS;
+}
+
+void ListModel::parseClipboard(SearchParams *searchParams) {
+    while (!videos.isEmpty())
+        delete videos.takeFirst();
+    m_activeVideo = 0;
+    m_activeRow = -1;
+    skip = 1;
+    errorMessage.clear();
+    reset();
+
+    this->searchParams = searchParams;
+
+    // parse video data and add the pasted video to the top
+    Video *video = new Video();
+
+    video->setWebpage(QUrl(QApplication::clipboard()->text()));
+    // FIXME malformed clipboard?
+    //video->setWebpage(QUrl(QString("http://www.youtube.com/watch?v=qrsuiD2y3c0")));
+    YouTubeInfoReader *info = new YouTubeInfoReader();
+    connect(info, SIGNAL(infoRead(Video*)), this, SLOT(infoRead(Video*)));
+    info->readInfoAbout(video);
+}
+
+void ListModel::infoRead(Video *video) {
+    // create a youtube search using the title of the pasted video
+    if (youtubeSearch) delete youtubeSearch;
+    youtubeSearch = new YouTubeSearch();
+    connect(youtubeSearch, SIGNAL(gotVideo(Video*)), this, SLOT(addVideo(Video*)));
+    connect(youtubeSearch, SIGNAL(finished(int)), this, SLOT(searchFinished(int)));
+    connect(youtubeSearch, SIGNAL(error(QString)), this, SLOT(searchError(QString)));
+
+    searchParams->setKeywords(video->title());
+    searching = true;
+    justPastedVideo = true;
+
+    video->loadStreamUrl();
+    addVideo(video);
+    video->preloadThumbnail();
+    
+    searchFinished(1);
 }
 
 void ListModel::searchMore(int max) {
@@ -201,8 +249,11 @@ void ListModel::searchFinished(int total) {
     searching = false;
     canSearchMore = total > 0;
 
+    qDebug() << "emitting dataChanged";
     // update the message item
     emit dataChanged( createIndex( MAX_ITEMS, 0 ), createIndex( MAX_ITEMS, columnCount() - 1 ) );
+
+    qDebug() << "emitting went fine";
 }
 
 void ListModel::searchError(QString message) {
@@ -224,15 +275,20 @@ void ListModel::addVideo(Video* video) {
         // autoplay
         setActiveRow(0);
 
-        // save keyword
-        QString query = searchParams->keywords();
-        QSettings settings;
-        QStringList keywords = settings.value(recentKeywordsKey).toStringList();
-        keywords.removeAll(query);
-        keywords.prepend(query);
-        while (keywords.size() > 10)
-            keywords.removeLast();
-        settings.setValue(recentKeywordsKey, keywords);
+        qDebug() << "you were right!";
+        qDebug() << video->title();
+        if (searchParams) {
+            qDebug() << "shouldn't be here";
+            // save keyword
+            QString query = searchParams->keywords();
+            QSettings settings;
+            QStringList keywords = settings.value(recentKeywordsKey).toStringList();
+            keywords.removeAll(query);
+            keywords.prepend(query);
+            while (keywords.size() > 10)
+                keywords.removeLast();
+            settings.setValue(recentKeywordsKey, keywords);
+        }
     }
 
 }

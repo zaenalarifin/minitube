@@ -46,7 +46,7 @@ void Video::loadStreamUrl() {
 
 }
 
-void  Video::getVideoInfo() {
+void Video::getVideoInfo() {
     static const QStringList elTypes = QStringList() << "&el=embedded" << "&el=vevo" << "&el=detailpage" << "";
 
     if (elIndex > elTypes.size() - 1) {
@@ -66,8 +66,9 @@ void  Video::getVideoInfo() {
             ).arg(videoId, elTypes.at(elIndex)));
 
     QObject *reply = The::http()->get(videoInfoUrl);
-    connect(reply, SIGNAL(data(QByteArray)), SLOT(gotVideoInfo(QByteArray)));
-    connect(reply, SIGNAL(error(QNetworkReply*)), SLOT(errorVideoInfo(QNetworkReply*)));
+
+    connect(reply, SIGNAL(data(QByteArray)), this, SLOT(gotVideoInfo(QByteArray)));
+    connect(reply, SIGNAL(error(QNetworkReply*)), this, SLOT(errorVideoInfo(QNetworkReply*)));
 
     // see you in gotVideoInfo...
 
@@ -142,6 +143,7 @@ void Video::foundVideoUrl(QString videoToken, int definitionCode) {
 }
 
 void Video::errorVideoInfo(QNetworkReply *reply) {
+    qDebug() << "in errorVideoInfo";
     emit errorStreamUrl(tr("Network error: %1 for %2").arg(reply->errorString(), reply->url().toString()));
 }
 

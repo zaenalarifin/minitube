@@ -169,6 +169,19 @@ void MediaView::search(SearchParams *searchParams) {
 
 }
 
+void MediaView::playFromClipboard(SearchParams *searchParams) {
+    reallyStopped = false;
+
+    videoAreaWidget->clear();
+    workaroundTimer->stop();
+    errorTimer->stop();
+
+    this->searchParams = searchParams;
+
+    listModel->parseClipboard(searchParams);
+    listView->setFocus();
+}
+
 void MediaView::disappear() {
     timerPlayFlag = true;
 }
@@ -262,6 +275,8 @@ void MediaView::activeRowChanged(int row) {
     workaroundTimer->stop();
     errorTimer->stop();
 
+    qDebug() << "activeRowChanged";
+
     // immediately show the loading widget
     videoAreaWidget->showLoading(video);
 
@@ -277,7 +292,6 @@ void MediaView::activeRowChanged(int row) {
     // video title in the statusbar
     QMainWindow* mainWindow = dynamic_cast<QMainWindow*>(window());
     if (mainWindow) mainWindow->statusBar()->showMessage(video->title());
-
     // see you in gotStreamUrl...
 
 }

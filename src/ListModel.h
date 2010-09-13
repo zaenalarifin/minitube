@@ -57,6 +57,7 @@ public:
     void search(SearchParams *searchParams);
     void abortSearch();
 
+    void parseClipboard(SearchParams *searchParams);
 
 public slots:
     void searchMore();
@@ -65,6 +66,7 @@ public slots:
     void searchFinished(int total);
     void searchError(QString message);
     void updateThumbnail();
+    void infoRead(Video *video);
 
 signals:
     void activeRowChanged(int);
@@ -77,6 +79,8 @@ private:
     SearchParams *searchParams;
     bool searching;
     bool canSearchMore;
+
+    bool justPastedVideo;
 
     QList<Video*> videos;
     int skip;

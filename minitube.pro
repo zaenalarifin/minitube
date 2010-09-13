@@ -1,4 +1,4 @@
-CONFIG += release
+CONFIG += qt debug
 TEMPLATE = app
 VERSION = 1.1
 DEFINES += APP_VERSION="$$VERSION"
@@ -18,6 +18,7 @@ HEADERS += src/MainWindow.h \
     src/MediaView.h \
     src/AboutView.h \
     src/youtubesearch.h \
+    src/youtubeinforeader.h\
     src/video.h \
     src/youtubestreamreader.h \
     src/View.h \
@@ -52,6 +53,7 @@ SOURCES += src/main.cpp \
     src/MediaView.cpp \
     src/AboutView.cpp \
     src/youtubesearch.cpp \
+    src/youtubeinforeader.cpp\
     src/youtubestreamreader.cpp \
     src/searchlineedit.cpp \
     src/urllineedit.cpp \

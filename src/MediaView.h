@@ -37,6 +37,7 @@ public:
 
 public slots:
     void search(SearchParams *searchParams);
+    void playFromClipboard(SearchParams *searchParams);
     void pause();
     void stop();
     void skip();

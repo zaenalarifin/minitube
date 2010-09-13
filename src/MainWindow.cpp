@@ -155,6 +155,13 @@ void MainWindow::createActions() {
     actions->insert("videolink", copyLinkAct);
     connect(copyLinkAct, SIGNAL(triggered()), mediaView, SLOT(copyVideoLink()));
 
+    pasteLinkAct = new QAction(tr("Paste/play a Youtube link"), this);
+    pasteLinkAct->setStatusTip(tr("Paste a Youtube link from clipboard and play it"));
+    pasteLinkAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
+    pasteLinkAct->setEnabled(true);
+    actions->insert("pastelink", pasteLinkAct);
+    connect(pasteLinkAct, SIGNAL(triggered()), this, SLOT(pasteVideoLink()));
+
     removeAct = new QAction(tr("&Remove"), this);
     removeAct->setStatusTip(tr("Remove the selected videos from the playlist"));
     removeAct->setShortcuts(QList<QKeySequence>() << QKeySequence("Del") << QKeySequence("Backspace"));
@@ -310,6 +317,7 @@ void MainWindow::createMenus() {
     viewMenu->addAction(webPageAct);
     viewMenu->addAction(copyPageAct);
     viewMenu->addAction(copyLinkAct);
+    viewMenu->addAction(pasteLinkAct);
     viewMenu->addSeparator();
     viewMenu->addAction(compactViewAct);
     viewMenu->addAction(fullscreenAct);
@@ -834,4 +842,14 @@ void MainWindow::clearRecentKeywords() {
     settings.remove("recentKeywords");
     searchView->updateRecentKeywords();
     statusBar()->showMessage(tr("Your privacy is now safe"));
+}
+
+void MainWindow::pasteVideoLink() {
+    SearchParams *searchParams = new SearchParams();
+    searchParams->setKeywords(QString("random"));
+    mediaView->playFromClipboard(searchParams);
+    showWidget(mediaView);
+
+    QString message = tr("Player should now start playing the pasted link");
+    mediaView->search(searchParams);
 }

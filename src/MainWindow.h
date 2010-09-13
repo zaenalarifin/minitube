@@ -56,6 +56,9 @@ private slots:
     void showFullscreenToolbar(bool show);
     void showFullscreenPlaylist(bool show);
 
+    // plays video from clipboard
+    void pasteVideoLink();
+
 private:
     void initPhonon();
     void createActions();
@@ -95,6 +98,7 @@ private:
     QAction *webPageAct;
     QAction *copyPageAct;
     QAction *copyLinkAct;
+    QAction *pasteLinkAct;
     QAction *downloadAct;
     QAction *volumeUpAct;
     QAction *volumeDownAct;
