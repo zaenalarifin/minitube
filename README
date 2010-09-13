@@ -1,0 +1,9 @@
+Fork of Flavio Tordini's Minitube.
+
+My (Matej Drame) additions:
+
+* Added ability to play links from clipboard. Just press Ctrl+P (or select the appropriate
+  option from the menu). Currently only YouTube video links are supported. The playlist is
+  populated with similar videos.
+
+Tested on Debian only.
